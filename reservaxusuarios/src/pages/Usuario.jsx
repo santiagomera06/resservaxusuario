@@ -1,59 +1,62 @@
-import React, { useEffect, useState} from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import { createContext, useContext } from 'react';
+import axios from "axios";  
+import { useEffect, useState } from "react";  
+import { useNavigate } from "react-router-dom";  
+import { createContext, useContext } from "react";  
 
+// 1. crear context
 const UserContext = createContext();
-function Usuario(){
-    const [Users, setUsers] = useState([]);
-    const [selectUsers, setselectUsers] = useState([null]);
-    const navigate = useNavigate()
+
+function Usuarios() {
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setselectedUser] = useState(null);
+    const navigate = useNavigate();
 
     const listUser = async () => {
-        try{
-          const res = await axios.get('http://localhost:3307/api/usuarios');
-          setUsers(res.data); 
-          console.log(res.data)
+        try {
+            const respuesta = await axios.get(" http://localhost:3307/api/usuarios");
+            setUsers(respuesta.data);
+        } catch (error) {
+            console.log("error al obtener los datos:", error);
         }
-        catch (e){
-          console.log(e)
-          console.log(e.response)
-        }
-    }
-    const selectUser = async (index) => {
-        console.log(index)
-        setselectUsers(index);
-        navigate(`/usuario/${index}`)
-    }
-      useEffect(() =>{
-        listUser()
-      },[])
-    return(
-        <useContext value={selectUsers}>
-        <div>
-            <h1>Usuario</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Users.map((index) => (
-                        <tr key={index.id}>
-                            <td>{index.id}</td>
-                            <td>{index.nombre}</td>
-                            <td>
-                                <button onClick={() => selectUser(index.id)}>ver detalles</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    </useContext>
-    )
+    };
+
+    const selectUser = (index) => {
+        console.log(index);
+        setselectedUser(index);
+        navigate(`/usuario/${index.id}`);
+    };
+
+    useEffect(() => {
+        listUser();
+    }, []);
+
+    return (
+        <UserContext.Provider value={{ selectedUser, setselectedUser }}>
+            <div>
+                <h1>COMPONENTE USUARIOS</h1>
+                <table>
+                    <thead>
+                        <th>ID</th>
+                        <th>NOMBRE</th>
+                    </thead>
+                    <tbody>
+                        {users.map((index) => (
+                            <tr>
+                                <td>{index.id}</td>
+                                <td>{index.nombre}</td>
+                                <td>
+                                    <button onClick={() => selectUser(index)}>
+                                        ver Detalle
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </UserContext.Provider>
+    );
 }
 
-export default Usuario
+export default Usuarios;
+export { UserContext };
